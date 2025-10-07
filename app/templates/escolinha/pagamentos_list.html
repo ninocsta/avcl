@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="text-xl font-bold mb-4">Pagamentos — {{ aluno.nome_completo }}</h2>
+
+<!-- CARD COM INFORMAÇÕES DO ALUNO -->
+<div class="card bg-base-200 shadow mb-6">
+  <div class="card-body p-4">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+      <p><strong>Responsável:</strong> {{ aluno.nome_responsavel|default:"-" }}</p>
+      
+      <p>
+        <strong>Telefone:</strong> 
+        {% if aluno.contato_responsavel %}
+          {{ aluno.contato_responsavel }}
+          <a href="https://wa.me/{{ aluno.contato_responsavel }}" target="_blank" 
+             class="btn btn-outline btn-sm ml-2">
+            <i class="bi bi-whatsapp"></i>
+          </a>
+        {% else %}
+          -
+        {% endif %}
+      </p>
+      
+      <p><strong>Mensalidade:</strong> R$ {{ aluno.mensalidade }}</p>
+    </div>
+  </div>
+</div>
+
+
+<a href="{% url 'pagamento_create' aluno.id %}" class="btn btn-primary mb-4 w-full md:w-auto">+ Novo pagamento</a>
+
+<!-- TABELA DE PAGAMENTOS -->
+<div class="overflow-x-auto">
+  <table class="table w-full text-sm">
+    <thead>
+      <tr>
+        <th>Vencimento</th>
+        <th class="hidden sm:table-cell">Pagamento</th>
+        <th class="hidden sm:table-cell">Forma</th>
+        <th>Valor</th>
+        <th>Status</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in pagamentos %}
+      <tr>
+        <td>{{ p.data_vencimento }}</td>
+        <td class="hidden sm:table-cell">{{ p.data_pagamento|default:"-" }}</td>
+        <td class="hidden sm:table-cell">{{ p.get_forma_pagamento_display }}</td>
+        <td>R$ {{ p.valor }}</td>
+        <td>
+          {% if p.esta_pago %}
+          <span class="badge badge-success text-white">Pago</span>
+          {% elif p.atrasado %}
+          <span class="badge badge-error text-white">Atrasado</span>
+          {% else %}
+          <span class="badge badge-warning text-white">Pendente</span>
+          {% endif %}
+        </td>
+        <td class="flex flex-col gap-2 md:flex-row">
+          <a href="{% url 'pagamento_update' p.id %}" class="btn btn-sm w-full md:w-auto">Editar</a>
+          <a href="{% url 'pagamento_delete' p.id %}" class="btn btn-sm w-full md:w-auto">
+            <i class="bi bi-trash"></i>
+          </a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" class="text-center">Nenhum pagamento encontrado.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+
+<a href="{% url 'alunos_list' %}" class="btn mt-4 w-full md:w-auto">Voltar</a>
+{% endblock %}

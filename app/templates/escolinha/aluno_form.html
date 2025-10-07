@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="text-xl font-bold mb-4">{% if aluno %}Editar{% else %}Novo{% endif %} Aluno</h2>
+
+<form method="post" class="space-y-6">
+  {% csrf_token %}
+
+  <!-- Nome completo -->
+  <div class="form-control w-full">
+    <label class="label">
+      <span class="label-text">Nome completo</span>
+    </label>
+    {{ form.nome_completo }}
+    {% if form.nome_completo.errors %}
+    <span class="text-red-500 text-sm">{{ form.nome_completo.errors.0 }}</span>
+    {% endif %}
+  </div>
+
+  <!-- Data nascimento -->
+  <div class="form-control w-full">
+    <label class="label">
+      <span class="label-text">Data de Nascimento</span>
+    </label>
+    {{ form.data_nascimento }}
+    {% if form.data_nascimento.errors %}
+    <span class="text-red-500 text-sm">{{ form.data_nascimento.errors.0 }}</span>
+    {% endif %}
+  </div>
+  <!-- Responsável -->
+  <div class="form-control w-full">
+    <label class="label">
+      <span class="label-text">Responsável</span>
+    </label>
+    {{ form.nome_responsavel }}
+    {% if form.nome_responsavel.errors %}
+    <span class="text-red-500 text-sm">{{ form.nome_responsavel.errors.0 }}</span>
+    {% endif %}
+  </div>
+  <!-- Contato -->
+  <div class="form-control w-full">
+    <label class="label">
+      <span class="label-text">Contato</span>
+    </label>
+    {{ form.contato_responsavel }}
+    {% if form.contato_responsavel.errors %}
+    <span class="text-red-500 text-sm">{{ form.contato_responsavel.errors.0 }}</span>
+    {% endif %}
+  </div>
+
+  <!-- Mensalidade -->
+  <div class="form-control w-full">
+    <label class="label">
+      <span class="label-text">Mensalidade</span>
+    </label>
+    {{ form.mensalidade }}
+    {% if form.mensalidade.errors %}
+    <span class="text-red-500 text-sm">{{ form.mensalidade.errors.0 }}</span>
+    {% endif %}
+  </div>
+
+  <!-- Is Active Hidden if not aluno -->
+  {% if aluno %}
+  <div class="form-control w-full">
+    <label class="label">
+      <span class="label-text">Ativo</span>
+    </label>
+    {{ form.is_active }}
+    {% if form.is_active.errors %}
+    <span class="text-red-500 text-sm">{{ form.is_active.errors.0 }}</span>
+    {% endif %}
+  {% else %}
+  <div class="form-control w-full hidden ">
+    <label class="label">
+      <span class="label-text">Ativo</span>
+    </label>
+    {{ form.is_active }}
+    {% if form.is_active.errors %}
+    <span class="text-red-500 text-sm">{{ form.is_active.errors.0 }}</span>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Botões -->
+  <div class="flex space-x-2 mt-4">
+    <button type="submit" class="btn  btn-primary">Salvar</button>
+    <a href="{% url 'alunos_list' %}" class="btn btn-outline">Cancelar</a>
+  </div>
+
+</form>
+{% endblock %}

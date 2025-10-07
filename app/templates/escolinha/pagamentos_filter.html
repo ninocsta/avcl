@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="text-xl font-bold mb-4">Pagamentos</h2>
+
+<!-- FILTROS -->
+<form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+  <!-- Filtro por aluno (texto) -->
+  <div class="form-control">
+    <label class="label"><span class="label-text">Aluno</span></label>
+    <input type="text" name="aluno" value="{{ filtro_aluno }}" placeholder="Digite o nome do aluno"
+           class="input input-bordered w-full" />
+  </div>
+
+  <!-- Filtro por status -->
+  <div class="form-control">
+    <label class="label"><span class="label-text">Status</span></label>
+    <select name="status" class="select select-bordered w-full">
+      <option value="">Todos</option>
+      <option value="pago" {% if filtro_status == "pago" %}selected{% endif %}>Pago</option>
+      <option value="pendente" {% if filtro_status == "pendente" %}selected{% endif %}>Pendente</option>
+      <option value="atrasado" {% if filtro_status == "atrasado" %}selected{% endif %}>Atrasado</option>
+    </select>
+  </div>
+
+  <!-- Botão -->
+  <div class="form-control flex justify-end">
+    <button type="submit" class="btn btn-primary mt-6 w-full md:w-auto">Filtrar</button>
+  </div>
+</form>
+
+<!-- TABELA -->
+<div class="overflow-x-auto">
+  <table class="table w-full text-sm">
+    <thead>
+      <tr>
+        <th>Aluno</th>
+        <th>Vencimento</th>
+        <th class="hidden sm:table-cell">Pagamento</th>
+        <th>Valor</th>
+        <th>Status</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in pagamentos %}
+      <tr>
+        <td>{{ p.aluno.nome_completo }}</td>
+        <td>{{ p.data_vencimento }}</td>
+        <td class="hidden sm:table-cell">{{ p.data_pagamento|default:"-" }}</td>
+        <td>R$ {{ p.valor }}</td>
+        <td>
+          {% if p.esta_pago %}
+          <span class="badge badge-success text-white">Pago</span>
+          {% elif p.atrasado %}
+          <span class="badge badge-error text-white">Atrasado</span>
+          {% else %}
+          <span class="badge badge-warning text-white">Pendente</span>
+          {% endif %}
+        </td>
+        <td class="flex flex-col gap-2 md:flex-row">
+          <a href="{% url 'pagamento_update' p.id %}" class="btn btn-sm w-full md:w-auto">Editar</a>
+          <a href="{% url 'pagamento_delete' p.id %}" class="btn btn-sm w-full md:w-auto"><i class="bi bi-trash"></i></a>
+        </td>
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="6" class="text-center">Nenhum pagamento encontrado.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

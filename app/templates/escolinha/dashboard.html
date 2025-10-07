@@ -1,0 +1,78 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="text-xl font-bold mb-4">Dashboard</h2>
+
+<!-- FILTRO -->
+<form method="get" class="flex flex-col md:flex-row gap-4 mb-6">
+  <div>
+    <label class="label"><span class="label-text">Mês</span></label>
+    <input type="number" name="month" min="1" max="12" value="{{ month }}" class="input input-bordered w-full md:w-24">
+  </div>
+  <div>
+    <label class="label"><span class="label-text">Ano</span></label>
+    <input type="number" name="year" value="{{ year }}" class="input input-bordered w-full md:w-32">
+  </div>
+  <div class="flex items-end">
+    <button type="submit" class="btn btn-primary">Filtrar</button>
+  </div>
+</form>
+
+<!-- CARDS -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+  <div class="card bg-base-200 p-4 shadow"><h3>Recebido</h3><p class="text-2xl">R$ {{ recebido }}</p></div>
+  <div class="card bg-base-200 p-4 shadow"><h3>Esperado</h3><p class="text-2xl">R$ {{ esperado }}</p></div>
+  <div class="card bg-base-200 p-4 shadow"><h3>Ativos</h3><p class="text-2xl">{{ ativos }}</p></div>
+  <div class="card bg-base-200 p-4 shadow"><h3>Atrasado</h3><p class="text-2xl">R$ {{ atrasado }}</p></div>
+</div>
+
+<!-- GRAFICOS -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+  <!-- Faturamento últimos 6 meses -->
+  <div class="card bg-base-200 p-4 shadow">
+    <h3 class="font-semibold mb-2">Faturamento últimos 6 meses</h3>
+    <canvas id="faturamentoChart"></canvas>
+  </div>
+
+  <!-- Formas de pagamento -->
+  <div class="card bg-base-200 p-4 shadow">
+    <h3 class="font-semibold mb-2">Formas de pagamento ({{ month }}/{{ year }})</h3>
+    <canvas id="formasChart" style="max-height: 275px;"></canvas>
+  </div>
+</div>
+
+<!-- CHART.JS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  // Gráfico de faturamento
+  const faturamentoData = {
+    labels: {{ faturamento_labels|safe }},
+    datasets: [{
+      label: 'Recebido (R$)',
+      data: {{ faturamento_values|safe }},
+      borderColor: 'rgb(75, 192, 192)',
+      backgroundColor: 'rgba(75, 192, 192, 0.3)',
+      fill: true,
+      tension: 0.2
+    }]
+  };
+  new Chart(document.getElementById('faturamentoChart'), {
+    type: 'line',
+    data: faturamentoData,
+  });
+
+  // Gráfico de formas de pagamento
+  const formasData = {
+    labels: {{ formas_labels|safe }},
+    datasets: [{
+      data: {{ formas_values|safe }},
+      backgroundColor: ['#10b981', '#3b82f6', '#f59e0b']
+    }]
+  };
+  new Chart(document.getElementById('formasChart'), {
+    type: 'pie',
+    data: formasData,
+  });
+</script>
+
+
+{% endblock %}

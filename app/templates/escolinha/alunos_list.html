@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="text-xl font-bold mb-4">Alunos</h2>
+<a href="{% url 'aluno_create' %}" class="btn btn-primary mb-4 w-full md:w-auto">+ Novo aluno</a>
+
+<div class="overflow-x-auto">
+  <table class="table w-full text-sm">
+    <thead>
+      <tr>
+        <th>#</th>
+        <th>Nome</th>
+        <th class="hidden sm:table-cell">Responsável</th>
+        <th class="hidden sm:table-cell">Contato</th>
+        <th>Mensalidade</th>
+
+      </tr>
+    </thead>
+    <tbody>
+      {% for aluno in alunos %}
+      <tr>
+        <td class="whitespace-nowrap">
+          <div class="flex gap-2">
+            <a href="{% url 'pagamentos_list' aluno.id %}" class="btn btn-sm">
+              <i class="bi bi-search"></i>
+            </a>
+            <a href="{% url 'aluno_update' aluno.id %}" class="btn btn-sm">
+              <i class="bi bi-pencil"></i>
+            </a>
+          </div>
+        </td>
+
+        <td>{{ aluno.nome_completo }}</td>
+        <td class="hidden sm:table-cell">{{ aluno.nome_responsavel }}</td>
+        <td class="hidden sm:table-cell">{{ aluno.contato_responsavel }}</td>
+        <td>R$ {{ aluno.mensalidade }}</td>
+
+      </tr>
+      {% empty %}
+      <tr>
+        <td colspan="5" class="text-center">Nenhum aluno cadastrado.</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}

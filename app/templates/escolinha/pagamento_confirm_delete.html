@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="text-xl font-bold mb-4">Excluir Pagamento</h2>
+<p>Tem certeza que deseja excluir o pagamento de <strong>{{ pagamento.aluno.nome_completo }}</strong> com vencimento em <strong>{{ pagamento.data_vencimento }}</strong>?</p>
+
+<form method="post" class="flex flex-col sm:flex-row gap-2 mt-4">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-error w-full sm:w-auto text-white">Sim, excluir</button>
+  <a href="{% url 'pagamentos_list' pagamento.aluno.id %}" class="btn btn-outline w-full sm:w-auto">Cancelar</a>
+</form>
+{% endblock %}
