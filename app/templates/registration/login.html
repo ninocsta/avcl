@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="pt-br" data-theme="dark">
+
+<head>
+  {% load static %}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login</title>
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
+  <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css" />
+
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+</head>
+
+<body class="min-h-screen flex flex-col">
+  <h1 class="font-bold text-center text-white text-4xl p-6" style="margin-top: 40px;">AVCL</h1>
+  <!-- Conteúdo central -->
+  <div class="flex-1 flex flex-col items-center my-10">
+    <div class="card w-full max-w-sm md:max-w-md lg:max-w-lg shadow-xl bg-base-100">
+      <div class="card-body">
+        <form method="post" class="space-y-4">
+          {% csrf_token %}
+
+          <div>
+            <label class="label">
+              <span class="label-text">Usuário</span>
+            </label>
+            <input type="text" name="username" id="username" placeholder="Digite seu usuário"
+              class="input input-bordered input-md w-full" required autocomplete="username">
+          </div>
+
+          <div>
+            <label class="label">
+              <span class="label-text">Senha</span>
+            </label>
+            <input type="password" name="password" id="password" placeholder="Digite sua senha"
+              class="input input-bordered input-md w-full" required autocomplete="current-password">
+          </div>
+
+          <button type="submit" class="btn btn-primary w-full">Entrar</button>
+        </form>
+
+        {% if form.errors %}
+        <div class="alert alert-error mt-4">
+          <ul class="list-disc list-inside">
+            {% for field in form %}
+            {% for error in field.errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+            {% endfor %}
+            {% for error in form.non_field_errors %}
+            <li>{{ error }}</li>
+            {% endfor %}
+          </ul>
+        </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+
+
+  <!-- Footer -->
+  <footer class="footer bg-base-300 text-base-content justify-center p-4 mt-auto" style="align-self: center;">
+    &copy; {{ year }} NKCosta Sistemas
+  </footer>
+
+</body>
+
+</html>

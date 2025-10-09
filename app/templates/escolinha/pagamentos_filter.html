@@ -3,12 +3,12 @@
 <h2 class="text-xl font-bold mb-4">Pagamentos</h2>
 
 <!-- FILTROS -->
-<form method="get" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+<form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
   <!-- Filtro por aluno (texto) -->
   <div class="form-control">
     <label class="label"><span class="label-text">Aluno</span></label>
     <input type="text" name="aluno" value="{{ filtro_aluno }}" placeholder="Digite o nome do aluno"
-           class="input input-bordered w-full" />
+      class="input input-bordered w-full" />
   </div>
 
   <!-- Filtro por status -->
@@ -22,11 +22,19 @@
     </select>
   </div>
 
+  <!-- Filtro por mês/ano -->
+  <div class="form-control">
+    <label class="label"><span class="label-text">Mês</span></label>
+    <input type="month" name="data" value="{{ ano }}-{{ mes }}" class="input input-bordered w-full">
+  </div>
+
+
   <!-- Botão -->
   <div class="form-control flex justify-end">
     <button type="submit" class="btn btn-primary mt-6 w-full md:w-auto">Filtrar</button>
   </div>
 </form>
+
 
 <!-- TABELA -->
 <div class="overflow-x-auto">
@@ -42,7 +50,7 @@
       </tr>
     </thead>
     <tbody>
-      {% for p in pagamentos %}
+      {% for p in page_obj %}
       <tr>
         <td>{{ p.aluno.nome_completo }}</td>
         <td>{{ p.data_vencimento }}</td>
@@ -59,7 +67,25 @@
         </td>
         <td class="flex flex-col gap-2 md:flex-row">
           <a href="{% url 'pagamento_update' p.id %}" class="btn btn-sm w-full md:w-auto">Editar</a>
-          <a href="{% url 'pagamento_delete' p.id %}" class="btn btn-sm w-full md:w-auto"><i class="bi bi-trash"></i></a>
+          <a href="{% url 'pagamento_delete' p.id %}" class="btn btn-sm w-full md:w-auto">
+            <i class="bi bi-trash"></i>
+          </a>
+
+          {% if not p.esta_pago %}
+          {% if p.atrasado %}
+          <a href="https://wa.me/55{{ aluno.contato_responsavel }}?text={{ msg_cobranca }}"
+            class="btn btn-outline btn-sm ml-2" target="_blank">
+            <i class="bi bi-whatsapp"></i>
+          </a>
+
+
+          {% else %}
+          <a href="https://wa.me/55{{ aluno.contato_responsavel }}?text={{ msg_aviso }}"
+            class="btn btn-outline btn-sm ml-2" target="_blank">
+            <i class="bi bi-whatsapp"></i>
+          </a>
+          {% endif %}
+          {% endif %}
         </td>
       </tr>
       {% empty %}
@@ -69,5 +95,8 @@
       {% endfor %}
     </tbody>
   </table>
+
+
 </div>
+{% include "partials/pagination.html" %}
 {% endblock %}
