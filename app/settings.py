@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-ENVIRONMENT = os.getenv("DJANGO_ENV", "a")  # Se não estiver definido, assume "production"
+ENVIRONMENT = os.getenv("DJANGO_ENV", "production")  # Se não estiver definido, assume "production"
 
 # Define qual arquivo .env carregar
 if ENVIRONMENT == "production":
@@ -116,11 +116,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = '/static/'
-# Aqui vai a pasta onde você mantém os estáticos no código (ex: avcl/static/)
-STATICFILES_DIRS = [
-    BASE_DIR / "static",
-]
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
+
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media/')
 
 ## production STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 
