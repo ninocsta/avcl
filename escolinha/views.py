@@ -256,7 +256,7 @@ Verificamos que a mensalidade da escolinha de futsal ainda não foi identificada
 Pedimos, por gentileza, que o pagamento seja realizado o quanto antes, para evitar qualquer interrupção nas atividades do aluno.
 
 Pagamento via Pix
-Chave Pix: 5197457095
+Chave Pix: 51997457095
 Nome: Renato da Costa
 
 Caso o pagamento já tenha sido efetuado, por favor, desconsidere esta mensagem. ✅
@@ -272,7 +272,7 @@ A AVCL – Associação Vila Costa Lagoão lembra que a mensalidade da escolinha
 Pedimos que o pagamento seja realizado o quanto antes, garantindo que o aluno continue participando normalmente das atividades.
 
 Forma de pagamento – Pix
-Chave Pix: 5197457095
+Chave Pix: 51997457095
 Nome: Renato da Costa
 
 Agradecemos pela atenção e pela parceria de sempre!
