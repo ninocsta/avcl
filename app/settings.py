@@ -129,7 +129,11 @@ CELERY_RESULT_BACKEND = 'redis://localhost:6379/0'
 CELERY_TIMEZONE = 'America/Sao_Paulo'
 CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
+SESSION_COOKIE_NAME = "avcl_sessionid"
+CSRF_COOKIE_NAME = "avcl_csrftoken"
 
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SECURE = True
 
 
 LOGOUT_REDIRECT_URL = '/'
