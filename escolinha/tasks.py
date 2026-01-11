@@ -45,3 +45,4 @@ def gerar_pagamentos_mes():
             )
 
     return f"{alunos.count()} pagamentos processados para {hoje.month}/{hoje.year}"
+
