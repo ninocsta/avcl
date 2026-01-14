@@ -16,11 +16,11 @@ import json
 # ----- Alunos -----
 @login_required
 def alunos_list(request):
-    alunos = Aluno.objects.filter(is_active=True).order_by("nome_completo")
+    alunos = Aluno.objects.filter(is_active=True).select_related("turma").order_by("nome_completo")
     page_number = request.GET.get("page", 1)
 
-        # --- Paginação ---
-    paginator = Paginator(alunos, 20)  # 10 itens por página
+    # --- Paginação ---
+    paginator = Paginator(alunos, 20)
     page_obj = paginator.get_page(page_number)
 
     return render(request, "escolinha/alunos_list.html", {"alunos": page_obj, "page_obj": page_obj})
@@ -87,7 +87,7 @@ def turma_update(request, pk):
 @login_required
 def pagamentos_list(request, aluno_id):
     aluno = get_object_or_404(Aluno, pk=aluno_id)
-    pagamentos = aluno.pagamentos.all().order_by("-data_vencimento")
+    pagamentos = aluno.pagamentos.select_related("aluno").all().order_by("-data_vencimento")
     return render(request, "escolinha/pagamentos_list.html", {
         "aluno": aluno, 
         "pagamentos": pagamentos,
@@ -145,29 +145,30 @@ def dashboard(request):
     today = timezone.now().date()
     year = int(request.GET.get("year", today.year))
     month = int(request.GET.get("month", today.month))
+    turma = request.GET.get("turma")
 
     first_day = date(year, month, 1)
     last_day = date(year, month, calendar.monthrange(year, month)[1])
 
-    # --- Indicadores principais ---
-    esperado = Pagamento.objects.filter(
-        data_vencimento__range=(first_day, last_day)
-    ).aggregate(total=Sum("valor"))["total"] or 0
+    # Base queryset para aplicar filtro de turma
+    pagamentos_base = Pagamento.objects.filter(data_vencimento__range=(first_day, last_day))
+    if turma:
+        pagamentos_base = pagamentos_base.filter(aluno__turma__id=turma)
 
-    recebido = Pagamento.objects.filter(
-        data_vencimento__range=(first_day, last_day),
+    # --- Indicadores principais ---
+    esperado = pagamentos_base.aggregate(total=Sum("valor"))["total"] or 0
+
+    recebido = pagamentos_base.filter(
         data_pagamento__isnull=False
     ).aggregate(total=Sum("valor"))["total"] or 0
 
     ativos = (
-        Pagamento.objects.filter(data_vencimento__range=(first_day, last_day))
-        .values("aluno")
+        pagamentos_base.values("aluno")
         .distinct()
         .count()
     )
 
-    atrasado = Pagamento.objects.filter(
-        data_vencimento__range=(first_day, last_day),
+    atrasado = pagamentos_base.filter(
         data_pagamento__isnull=True,
         data_vencimento__lt=today
     ).aggregate(total=Sum("valor"))["total"] or 0
@@ -182,13 +183,14 @@ def dashboard(request):
         primeiro = date(ano, mes, 1)
         ultimo = date(ano, mes, calendar.monthrange(ano, mes)[1])
 
-        total = (
-            Pagamento.objects.filter(
-                data_vencimento__range=(primeiro, ultimo),
-                data_pagamento__isnull=False
-            ).aggregate(total=Sum("valor"))["total"]
-            or 0
+        pagamentos_mes = Pagamento.objects.filter(
+            data_vencimento__range=(primeiro, ultimo),
+            data_pagamento__isnull=False
         )
+        if turma:
+            pagamentos_mes = pagamentos_mes.filter(aluno__turma__id=turma)
+
+        total = pagamentos_mes.aggregate(total=Sum("valor"))["total"] or 0
         faturamento_6m.append({
             "mes": f"{mes:02d}/{ano}",
             "valor": float(total),
@@ -199,15 +201,15 @@ def dashboard(request):
 
     # --- Formas de pagamento (também pelo mês de vencimento) ---
     formas = (
-        Pagamento.objects.filter(
-            data_vencimento__range=(first_day, last_day),
-            data_pagamento__isnull=False
-        )
+        pagamentos_base.filter(data_pagamento__isnull=False)
         .values("forma_pagamento")
         .annotate(total=Count("id"))
     )
     formas_labels = [f["forma_pagamento"] for f in formas]
     formas_values = [f["total"] for f in formas]
+
+    # Buscar turmas ativas para o filtro
+    turmas = Turma.objects.filter(status=True).order_by("nome")
 
     context = {
         "recebido": recebido,
@@ -221,6 +223,8 @@ def dashboard(request):
         "formas_values": json.dumps(formas_values),
         "year": year,
         "month": month,
+        "turmas": turmas,
+        "filtro_turma": turma,
     }
     return render(request, "escolinha/dashboard.html", context)
 
@@ -230,6 +234,7 @@ def dashboard(request):
 def pagamentos_filter_view(request):
     aluno_nome = request.GET.get("aluno", "").strip()
     status = request.GET.get("status")
+    turma = request.GET.get("turma")
     data = request.GET.get("data")  # YYYY-MM
     page_number = request.GET.get("page", 1)
 
@@ -247,6 +252,10 @@ def pagamentos_filter_view(request):
         pagamentos = pagamentos.filter(data_pagamento__isnull=True, data_vencimento__gte=hoje)
     elif status == "atrasado":
         pagamentos = pagamentos.filter(data_pagamento__isnull=True, data_vencimento__lt=hoje)
+    
+    # Filtro por turma
+    if turma:
+        pagamentos = pagamentos.filter(aluno__turma__id=turma)
 
     # Filtro por mês/ano
     if data:
@@ -254,8 +263,10 @@ def pagamentos_filter_view(request):
         pagamentos = pagamentos.filter(data_vencimento__year=ano, data_vencimento__month=mes)
 
     # --- Paginação ---
-    paginator = Paginator(pagamentos, 25)  # 10 itens por página
+    paginator = Paginator(pagamentos, 20)  # 20 itens por página
     page_obj = paginator.get_page(page_number)
+
+    turmas = Turma.objects.filter(status=True).order_by("nome")
 
     # Extra query para manter filtros no href da paginação
     extra_query = ""
@@ -265,7 +276,8 @@ def pagamentos_filter_view(request):
         extra_query += f"&status={status}"
     if data:
         extra_query += f"&data={data}"
-
+    if turma:
+        extra_query += f"&turma={turma}"
     context = {
         "page_obj": page_obj,
         "filtro_aluno": aluno_nome,
@@ -275,6 +287,8 @@ def pagamentos_filter_view(request):
         "extra_query": extra_query,
         "msg_cobranca": whatsapp_message("cobranca"),
         "msg_aviso": whatsapp_message("aviso"),
+        "turmas": turmas,
+        "filtro_turma": turma,
     }
     return render(request, "escolinha/pagamentos_filter.html", context)
 

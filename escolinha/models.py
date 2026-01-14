@@ -10,6 +10,11 @@ class Turma(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    class Meta:
+        verbose_name = "Turma"
+        verbose_name_plural = "Turmas"
+        ordering = ["nome"]
+
     def __str__(self):
         return self.nome
 
@@ -24,11 +29,23 @@ class Aluno(models.Model):
     is_active = models.BooleanField(default=True)
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+    turma = models.ForeignKey(
+        Turma,
+        on_delete=models.PROTECT,
+        related_name="alunos"
+    )
+    class Meta:
+        verbose_name = "Aluno"
+        verbose_name_plural = "Alunos"
+        ordering = ["nome_completo"]
+        indexes = [
+            models.Index(fields=["is_active", "nome_completo"]),
+            models.Index(fields=["turma", "is_active"]),
+        ]
 
     def save(self, *args, **kwargs):
         if self.contato_responsavel:
             self.contato_responsavel = re.sub(r"\D", "", self.contato_responsavel)    
-    
         super().save(*args, **kwargs)
 
     def __str__(self):

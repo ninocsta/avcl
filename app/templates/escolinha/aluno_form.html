@@ -47,6 +47,17 @@
     {% endif %}
   </div>
 
+    <!-- Turma -->
+  <div class="form-control w-full">
+    <label class="label">
+      <span class="label-text">Turma</span>
+    </label>
+    {{ form.turma }}
+    {% if form.turma.errors %}
+    <span class="text-red-500 text-sm">{{ form.turma.errors.0 }}</span>
+    {% endif %}
+  </div>
+
   <!-- Mensalidade -->
   <div class="form-control w-full">
     <label class="label">

@@ -27,21 +27,21 @@ def gerar_pagamentos_mes():
 
         total_mes = pagamentos_mes.aggregate(total=Sum("valor"))["total"] or 0
 
-        # Se já tem pago/adiantado mas é menor que a mensalidade, cria a diferença
-        if total_mes < mensalidade:
+        # Se não existe nada ainda ou se o valor é menor que a mensalidade, cria/completa
+        if total_mes == 0:
+            # Cria a mensalidade inteira
+            Pagamento.objects.create(
+                aluno=aluno,
+                data_vencimento=vencimento,
+                valor=mensalidade
+            )
+        elif total_mes < mensalidade:
+            # Se já tem pago/adiantado mas é menor que a mensalidade, cria a diferença
             faltante = mensalidade - total_mes
             Pagamento.objects.create(
                 aluno=aluno,
                 data_vencimento=vencimento,
                 valor=faltante
-            )
-
-        # Se não existe nada ainda, cria a mensalidade inteira
-        elif total_mes == 0:
-            Pagamento.objects.create(
-                aluno=aluno,
-                data_vencimento=vencimento,
-                valor=mensalidade
             )
 
     return f"{alunos.count()} pagamentos processados para {hoje.month}/{hoje.year}"

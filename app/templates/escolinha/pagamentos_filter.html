@@ -3,7 +3,7 @@
 <h2 class="text-xl font-bold mb-4">Pagamentos</h2>
 
 <!-- FILTROS -->
-<form method="get" class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+<form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
   <!-- Filtro por aluno (texto) -->
   <div class="form-control">
     <label class="label"><span class="label-text">Aluno</span></label>
@@ -19,6 +19,18 @@
       <option value="pago" {% if filtro_status == "pago" %}selected{% endif %}>Pago</option>
       <option value="pendente" {% if filtro_status == "pendente" %}selected{% endif %}>Pendente</option>
       <option value="atrasado" {% if filtro_status == "atrasado" %}selected{% endif %}>Atrasado</option>
+    </select>
+  </div>
+
+    <!-- Filtro por turma -->
+  <div class="form-control">
+    <label class="label"><span class="label-text">Turma</span></label>
+    <select name="turma" class="select select-bordered w-full">
+      <option value="">Todas</option>
+      {% for turma in turmas %}
+      <option value="{{ turma.id }}" {% if filtro_turma|default:"" == turma.id|stringformat:"s" %}selected{% endif %}>
+        {{ turma.nome }}</option>
+      {% endfor %}    
     </select>
   </div>
 
@@ -73,14 +85,14 @@
 
           {% if not p.esta_pago %}
           {% if p.atrasado %}
-          <a href="https://wa.me/55{{ aluno.contato_responsavel }}?text={{ msg_cobranca }}"
+          <a href="https://wa.me/55{{ p.aluno.contato_responsavel }}?text={{ msg_cobranca }}"
             class="btn btn-outline btn-sm ml-2" target="_blank">
             <i class="bi bi-whatsapp"></i>
           </a>
 
 
           {% else %}
-          <a href="https://wa.me/55{{ aluno.contato_responsavel }}?text={{ msg_aviso }}"
+          <a href="https://wa.me/55{{ p.aluno.contato_responsavel }}?text={{ msg_aviso }}"
             class="btn btn-outline btn-sm ml-2" target="_blank">
             <i class="bi bi-whatsapp"></i>
           </a>

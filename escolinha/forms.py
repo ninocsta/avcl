@@ -12,6 +12,7 @@ class AlunoForm(forms.ModelForm):
             "contato_responsavel",
             "mensalidade",
             "is_active",
+            "turma",
         ]
         widgets = {
             "nome_completo": forms.TextInput(attrs={
@@ -42,10 +43,27 @@ class AlunoForm(forms.ModelForm):
                 "step": "0.01",
                 "placeholder": "Valor da mensalidade"
             }),
+            "turma": forms.Select(attrs={
+                "class": "select select-bordered w-full"
+            }),
             "is_active": forms.CheckboxInput(attrs={
                 "class": "checkbox checkbox-primary"
             }),
         }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Filtra turmas ativas
+        turmas_ativas = Turma.objects.filter(status=True)
+        
+        # Se está editando um aluno e ele tem uma turma desativada, inclui ela também
+        if self.instance and self.instance.pk and self.instance.turma:
+            if not self.instance.turma.status:
+                # Combina turmas ativas com a turma atual (desativada)
+                turmas_ativas = turmas_ativas | Turma.objects.filter(pk=self.instance.turma.pk)
+        
+        self.fields["turma"].queryset = turmas_ativas.distinct()
+        self.fields["turma"].empty_label = None  # Remove a opção "-----"
 
 
 class PagamentoForm(forms.ModelForm):
@@ -83,7 +101,9 @@ class PagamentoForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields["forma_pagamento"].initial = self.fields["forma_pagamento"].choices[1][0]
+        # Define PIX como padrão de forma segura
+        if len(self.fields["forma_pagamento"].choices) > 1:
+            self.fields["forma_pagamento"].initial = "PIX"
 
 class TurmaForm(forms.ModelForm):
     class Meta:

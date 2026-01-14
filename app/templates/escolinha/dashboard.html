@@ -12,6 +12,15 @@
     <label class="label"><span class="label-text">Ano</span></label>
     <input type="number" name="year" value="{{ year }}" class="input input-bordered w-full md:w-32">
   </div>
+  <div>
+    <label class="label"><span class="label-text">Turma</span></label>
+    <select name="turma" class="select select-bordered w-full md:w-48">
+      <option value="">Todas</option>
+      {% for t in turmas %}
+      <option value="{{ t.id }}" {% if filtro_turma == t.id|stringformat:"s" %}selected{% endif %}>{{ t.nome }}</option>
+      {% endfor %}
+    </select>
+  </div>
   <div class="flex items-end">
     <button type="submit" class="btn btn-primary">Filtrar</button>
   </div>

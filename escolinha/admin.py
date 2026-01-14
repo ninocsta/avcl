@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Aluno, Pagamento
+from .models import Aluno, Pagamento, Turma
 
 @admin.register(Aluno)
 class AlunoAdmin(admin.ModelAdmin):
@@ -12,3 +12,8 @@ class PagamentoAdmin(admin.ModelAdmin):
     list_display = ("aluno", "data_vencimento", "data_pagamento", "forma_pagamento", "valor", "esta_pago")
     list_filter = ("forma_pagamento", "data_vencimento")
     search_fields = ("aluno__nome_completo",)
+
+@admin.register(Turma)
+class TurmaAdmin(admin.ModelAdmin):
+    list_display = ("nome", "descricao", "status")
+    search_fields = ("nome",)
