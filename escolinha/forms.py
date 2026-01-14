@@ -1,5 +1,5 @@
 from django import forms
-from .models import Aluno, Pagamento
+from .models import Aluno, Pagamento, Turma
 
 
 class AlunoForm(forms.ModelForm):
@@ -84,3 +84,27 @@ class PagamentoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields["forma_pagamento"].initial = self.fields["forma_pagamento"].choices[1][0]
+
+class TurmaForm(forms.ModelForm):
+    class Meta:
+        model = Turma
+        fields = [
+            "nome",
+            "descricao",
+            "status",
+        ]
+        widgets = {
+            "nome": forms.TextInput(attrs={
+                "class": "input input-bordered w-full",
+                "type": "text",
+                "placeholder": "Nome da Turma"
+            }),
+            "descricao": forms.Textarea(attrs={
+                "class": "textarea textarea-bordered w-full",
+                "placeholder": "Descrição da Turma"
+            }),
+            "status": forms.CheckboxInput(attrs={
+            "class": "checkbox checkbox-primary"
+        })
+        }
+        

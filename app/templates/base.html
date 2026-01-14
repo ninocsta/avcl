@@ -29,6 +29,7 @@
           <a href="{% url 'dashboard' %}" class="btn btn-outline btn-ghost"><i class="bi bi-file-earmark-bar-graph"></i> Dashboard</a>
           <a href="{% url 'alunos_list' %}" class="btn btn-outline btn-ghost"><i class="bi bi-person"></i> Alunos</a>
           <a href="{% url 'pagamentos_filter' %}" class="btn btn-outline btn-ghost"><i class="bi bi-cash"></i> Pagamentos</a>
+          <a href="{% url 'turmas_list' %}" class="btn btn-outline btn-ghost"><i class="bi bi-people"></i> Turmas</a>
           <form action="{% url 'logout' %}" method="post" class="m-0 p-0">
             {% csrf_token %}
             <button type="submit" class="btn btn-outline btn-ghost">
@@ -69,7 +70,7 @@
 
   <!-- Footer -->
   <footer class="footer  text-base-content justify-center p-4 mt-auto" style="align-self: center;">
-    &copy; {{ year }} NKCosta Sistemas
+    <a href="https://costatech.dev">&copy; {{ year }} Costatech</a>
   </footer>
 
   </div>

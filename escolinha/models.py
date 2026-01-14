@@ -3,6 +3,17 @@ from django.utils import timezone
 import re
 
 
+class Turma(models.Model):
+    nome = models.CharField(max_length=100)
+    descricao = models.TextField(blank=True, null=True)
+    status = models.BooleanField(default=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def __str__(self):
+        return self.nome
+
+
 
 class Aluno(models.Model):
     nome_completo = models.CharField(max_length=150)

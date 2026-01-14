@@ -1,8 +1,8 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Sum, F, Q
 from django.utils import timezone
-from .models import Aluno, Pagamento
-from .forms import AlunoForm, PagamentoForm
+from .models import Aluno, Pagamento, Turma
+from .forms import AlunoForm, PagamentoForm, TurmaForm
 from datetime import date, timedelta
 import calendar
 from django.db.models import Count
@@ -17,9 +17,23 @@ import json
 @login_required
 def alunos_list(request):
     alunos = Aluno.objects.filter(is_active=True).order_by("nome_completo")
-    return render(request, "escolinha/alunos_list.html", {"alunos": alunos})
+    page_number = request.GET.get("page", 1)
 
+        # --- Paginação ---
+    paginator = Paginator(alunos, 20)  # 10 itens por página
+    page_obj = paginator.get_page(page_number)
 
+    return render(request, "escolinha/alunos_list.html", {"alunos": page_obj, "page_obj": page_obj})
+
+@login_required
+def turmas_list(request):
+    turmas = Turma.objects.filter(status=True).order_by("nome")
+    page_number = request.GET.get("page", 1)
+
+    # --- Paginação ---
+    paginator = Paginator(turmas, 20)  # 10 itens por página
+    page_obj = paginator.get_page(page_number)
+    return render(request, "escolinha/turmas_list.html", {"turmas": page_obj, "page_obj": page_obj})
 
 @login_required
 def aluno_create(request):
@@ -32,7 +46,16 @@ def aluno_create(request):
         form = AlunoForm()
         return render(request, "escolinha/aluno_form.html", {"form": form})
 
-
+@login_required
+def turma_create(request):
+    if request.method == "POST":
+        form = TurmaForm(request.POST)
+        if form.is_valid():
+            form.save()
+        return redirect("turmas_list")
+    else:
+        form = TurmaForm()
+        return render(request, "escolinha/turma_form.html", {"form": form})
 
 @login_required
 def aluno_update(request, pk):
@@ -46,6 +69,17 @@ def aluno_update(request, pk):
         form = AlunoForm(instance=aluno)
         return render(request, "escolinha/aluno_form.html", {"form": form, "aluno": aluno})
 
+@login_required
+def turma_update(request, pk):
+    turma = get_object_or_404(Turma, pk=pk)
+    if request.method == "POST":
+        form = TurmaForm(request.POST, instance=turma)
+        if form.is_valid():
+            form.save()
+            return redirect("turmas_list")
+    else:
+        form = TurmaForm(instance=turma)
+        return render(request, "escolinha/turma_form.html", {"form": form, "turma": turma})
 
 
 

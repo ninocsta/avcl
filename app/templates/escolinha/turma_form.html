@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2 class="text-xl font-bold mb-4">{% if turma %}Editar{% else %}Nova{% endif %} Turma</h2>
+
+<form method="post" class="space-y-6">
+  {% csrf_token %}
+
+  <!-- Nome completo -->
+  <div class="form-control w-full">
+    <label class="label">
+      <span class="label-text">Nome da turma</span>
+    </label>
+    {{ form.nome }}
+    {% if form.nome.errors %}
+    <span class="text-red-500 text-sm">{{ form.nome.errors.0 }}</span>
+    {% endif %}
+</div>
+  <!-- Descrição -->
+  <div class="form-control w-full">
+    <label class="label">
+      <span class="label-text">Descrição</span>
+    </label>
+    {{ form.descricao }}
+    {% if form.descricao.errors %}
+    <span class="text-red-500 text-sm">{{ form.descricao.errors.0 }}</span>
+    {% endif %}
+</div>
+  <!-- Is Active Hidden if not turma -->
+  {% if turma %}
+  <div class="form-control w-full">
+    <label class="label">
+      <span class="label-text">Status</span>
+    </label>
+    {{ form.status }}
+    {% if form.status.errors %}
+    <span class="text-red-500 text-sm">{{ form.status.errors.0 }}</span>
+    {% endif %}
+  {% else %}
+  <div class="form-control w-full hidden ">
+    <label class="label">
+      <span class="label-text">Status</span>
+    </label>
+    {{ form.status }}
+    {% if form.status.errors %}
+    <span class="text-red-500 text-sm">{{ form.status.errors.0 }}</span>
+    {% endif %}
+  </div>
+  {% endif %}
+
+  <!-- Botões -->
+  <div class="flex space-x-2 mt-4">
+    <button type="submit" class="btn  btn-primary">Salvar</button>
+    <a href="{% url 'turmas_list' %}" class="btn btn-outline">Cancelar</a>
+  </div>
+
+</form>
+{% endblock %}
