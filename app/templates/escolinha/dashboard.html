@@ -1,87 +1,222 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2 class="text-xl font-bold mb-4">Dashboard</h2>
+<p class="text-sm opacity-80 mb-4">Período analisado: {{ periodo_label }}</p>
 
 <!-- FILTRO -->
-<form method="get" class="flex flex-col md:flex-row gap-4 mb-6">
-  <div>
-    <label class="label"><span class="label-text">Mês</span></label>
-    <input type="number" name="month" min="1" max="12" value="{{ month }}" class="input input-bordered w-full md:w-24">
+<form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-4">
+  <div class="form-control">
+    <label class="label"><span class="label-text">Competência</span></label>
+    <input type="month" name="competencia" value="{{ competencia }}" class="input input-bordered w-full">
   </div>
-  <div>
-    <label class="label"><span class="label-text">Ano</span></label>
-    <input type="number" name="year" value="{{ year }}" class="input input-bordered w-full md:w-32">
-  </div>
-  <div>
+  <div class="form-control">
     <label class="label"><span class="label-text">Turma</span></label>
-    <select name="turma" class="select select-bordered w-full md:w-48">
+    <select name="turma" class="select select-bordered w-full">
       <option value="">Todas</option>
       {% for t in turmas %}
       <option value="{{ t.id }}" {% if filtro_turma == t.id|stringformat:"s" %}selected{% endif %}>{{ t.nome }}</option>
       {% endfor %}
     </select>
   </div>
-  <div class="flex items-end">
-    <button type="submit" class="btn btn-primary">Filtrar</button>
+  <div class="form-control">
+    <label class="label"><span class="label-text">Período</span></label>
+    <select name="periodo" class="select select-bordered w-full">
+      <option value="mes" {% if periodo == "mes" %}selected{% endif %}>Somente competência</option>
+      <option value="3m" {% if periodo == "3m" %}selected{% endif %}>Últimos 3 meses</option>
+    </select>
+  </div>
+  <div class="form-control">
+    <label class="label"><span class="label-text">Histórico gráfico</span></label>
+    <select name="historico" class="select select-bordered w-full">
+      <option value="6" {% if historico_meses == 6 %}selected{% endif %}>6 meses</option>
+      <option value="3" {% if historico_meses == 3 %}selected{% endif %}>3 meses</option>
+    </select>
+  </div>
+  <div class="form-control md:justify-end">
+    <button type="submit" class="btn btn-primary mt-6">Aplicar filtros</button>
   </div>
 </form>
 
+<div class="flex flex-col md:flex-row gap-2 mb-6">
+  <a href="?competencia={{ mes_atual }}&periodo=mes&historico={{ historico_meses }}{% if filtro_turma %}&turma={{ filtro_turma }}{% endif %}" class="btn btn-outline">Mês atual</a>
+  <a href="?competencia={{ mes_atual }}&periodo=3m&historico=3{% if filtro_turma %}&turma={{ filtro_turma }}{% endif %}" class="btn btn-outline">Últimos 3 meses</a>
+  {% if periodo == "3m" %}
+  <a href="?competencia={{ competencia }}&periodo=mes&historico={{ historico_meses }}{% if filtro_turma %}&turma={{ filtro_turma }}{% endif %}" class="btn btn-outline">Voltar para competência</a>
+  {% endif %}
+</div>
+
 <!-- CARDS -->
 <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-  <div class="card bg-base-200 p-4 shadow"><h3>Recebido</h3><p class="text-2xl">R$ {{ recebido }}</p></div>
-  <div class="card bg-base-200 p-4 shadow"><h3>Esperado</h3><p class="text-2xl">R$ {{ esperado }}</p></div>
-  <div class="card bg-base-200 p-4 shadow"><h3>Ativos</h3><p class="text-2xl">{{ ativos }}</p></div>
-  <div class="card bg-base-200 p-4 shadow"><h3>Atrasado</h3><p class="text-2xl">R$ {{ atrasado }}</p></div>
+  <a href="{{ dashboard_links.recebido }}" class="card bg-base-200 p-4 shadow hover:bg-base-300 transition">
+    <h3 class="text-sm opacity-80">Recebido</h3>
+    <p class="text-2xl font-semibold">R$ {{ recebido }}</p>
+  </a>
+  <a href="{{ dashboard_links.previsto }}" class="card bg-base-200 p-4 shadow hover:bg-base-300 transition">
+    <h3 class="text-sm opacity-80">Previsto</h3>
+    <p class="text-2xl font-semibold">R$ {{ esperado }}</p>
+  </a>
+  <a href="{{ dashboard_links.atrasado }}" class="card bg-base-200 p-4 shadow hover:bg-base-300 transition">
+    <h3 class="text-sm opacity-80">Inadimplência</h3>
+    <p class="text-2xl font-semibold">R$ {{ atrasado }}</p>
+    <p class="text-xs mt-1">{{ inadimplentes_qtd }} aluno(s) inadimplente(s)</p>
+  </a>
+  <div class="card bg-base-200 p-4 shadow">
+    <h3 class="text-sm opacity-80">Taxa de recebimento</h3>
+    <p class="text-2xl font-semibold">
+      {% if taxa is not None %}
+      {{ taxa|floatformat:1 }}%
+      {% else %}
+      -
+      {% endif %}
+    </p>
+  </div>
 </div>
 
 <!-- GRAFICOS -->
 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-  <!-- Faturamento últimos 6 meses -->
   <div class="card bg-base-200 p-4 shadow">
-    <h3 class="font-semibold mb-2">Faturamento últimos 6 meses</h3>
-    <canvas id="faturamentoChart"></canvas>
+    <h3 class="font-semibold mb-2">Previsto x Recebido (últimos {{ historico_meses }} meses)</h3>
+    <canvas id="recebimentoChart"></canvas>
+  </div>
+  <div class="card bg-base-200 p-4 shadow">
+    <h3 class="font-semibold mb-2">Recebimento no prazo vs em atraso</h3>
+    <canvas id="pontualidadeChart" style="max-height: 275px;"></canvas>
+  </div>
+</div>
+
+<!-- TOP 10 ALUNOS EM ATRASO -->
+<div class="card bg-base-200 p-4 shadow mt-6">
+  <div class="flex justify-between items-center mb-2">
+    <h3 class="font-semibold">Top 10 alunos em atraso (R$)</h3>
+    <span class="text-sm opacity-70">Maior atraso acumulado no período</span>
   </div>
 
-  <!-- Formas de pagamento -->
-  <div class="card bg-base-200 p-4 shadow">
-    <h3 class="font-semibold mb-2">Formas de pagamento ({{ month }}/{{ year }})</h3>
-    <canvas id="formasChart" style="max-height: 275px;"></canvas>
+  <div class="overflow-x-auto">
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>Aluno</th>
+          <th>Turma</th>
+          <th>Parcelas</th>
+          <th>1º vencimento</th>
+          <th>Total em atraso</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in top_alunos_atraso %}
+        <tr>
+          <td>{{ item.aluno__nome_completo }}</td>
+          <td>{{ item.aluno__turma__nome }}</td>
+          <td>{{ item.parcelas }}</td>
+          <td>{{ item.primeiro_vencimento }}</td>
+          <td>R$ {{ item.total_atraso }}</td>
+          <td class="flex flex-col md:flex-row gap-2">
+            <a href="{% url 'pagamentos_list' item.aluno_id %}" class="btn btn-outline btn-sm">Ver pendências</a>
+            {% if item.aluno__contato_responsavel %}
+            <a href="https://wa.me/55{{ item.aluno__contato_responsavel }}?text={{ msg_cobranca }}" class="btn btn-outline btn-sm" target="_blank">
+              <i class="bi bi-whatsapp"></i> Cobrar
+            </a>
+            {% endif %}
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="6" class="text-center">Sem alunos com atraso neste período.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- AÇÕES RÁPIDAS -->
+<div class="card bg-base-200 p-4 shadow mt-6">
+  <div class="flex justify-between items-center mb-2">
+    <h3 class="font-semibold">Ações rápidas de cobrança</h3>
+    <span class="text-sm opacity-70">Atrasados no período: {{ total_atrasados_registros }} (mostrando os {{ limite_acoes_rapidas }} mais antigos)</span>
+  </div>
+
+  <div class="overflow-x-auto">
+    <table class="table table-sm">
+      <thead>
+        <tr>
+          <th>Aluno</th>
+          <th>Turma</th>
+          <th>Vencimento</th>
+          <th>Valor</th>
+          <th>Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for p in pagamentos_atrasados %}
+        <tr>
+          <td>{{ p.aluno.nome_completo }}</td>
+          <td>{{ p.aluno.turma.nome }}</td>
+          <td>{{ p.data_vencimento }}</td>
+          <td>R$ {{ p.valor }}</td>
+          <td class="flex flex-col md:flex-row gap-2">
+            {% if p.aluno.contato_responsavel %}
+            <a href="https://wa.me/55{{ p.aluno.contato_responsavel }}?text={{ msg_cobranca }}" class="btn btn-outline btn-sm" target="_blank">
+              <i class="bi bi-whatsapp"></i> Cobrar
+            </a>
+            {% endif %}
+            <form method="post" action="{% url 'pagamento_mark_paid' p.id %}?next={{ request.get_full_path|urlencode }}">
+              {% csrf_token %}
+              <button type="submit" class="btn btn-success btn-sm text-white">Marcar como pago</button>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="5" class="text-center">Sem pagamentos atrasados neste período.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
   </div>
 </div>
 
 <!-- CHART.JS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script>
-  // Gráfico de faturamento
-  const faturamentoData = {
-    labels: {{ faturamento_labels|safe }},
+  const recebimentoData = {
+    labels: {{ historico_labels|safe }},
+    datasets: [{
+      type: 'bar',
+      label: 'Previsto (R$)',
+      data: {{ historico_esperado_values|safe }},
+      backgroundColor: 'rgba(59, 130, 246, 0.5)',
+      borderColor: 'rgb(59, 130, 246)',
+      borderWidth: 1
+    }, {
+      type: 'line',
+      label: 'Recebido (R$)',
+      data: {{ historico_recebido_values|safe }},
+      borderColor: 'rgb(16, 185, 129)',
+      backgroundColor: 'rgba(16, 185, 129, 0.2)',
+      tension: 0.25,
+      fill: false
+    }],
+  };
+  new Chart(document.getElementById('recebimentoChart'), {
+    data: recebimentoData,
+  });
+
+  const pontualidadeData = {
+    labels: {{ pontualidade_labels|safe }},
     datasets: [{
       label: 'Recebido (R$)',
-      data: {{ faturamento_values|safe }},
-      borderColor: 'rgb(75, 192, 192)',
-      backgroundColor: 'rgba(75, 192, 192, 0.3)',
-      fill: true,
-      tension: 0.2
-    }]
+      data: {{ pontualidade_values|safe }},
+      backgroundColor: ['rgba(16, 185, 129, 0.6)', 'rgba(245, 158, 11, 0.6)'],
+      borderColor: ['rgb(16, 185, 129)', 'rgb(245, 158, 11)'],
+      borderWidth: 1
+    }],
   };
-  new Chart(document.getElementById('faturamentoChart'), {
-    type: 'line',
-    data: faturamentoData,
-  });
-
-  // Gráfico de formas de pagamento
-  const formasData = {
-    labels: {{ formas_labels|safe }},
-    datasets: [{
-      data: {{ formas_values|safe }},
-      backgroundColor: ['#10b981', '#3b82f6', '#f59e0b']
-    }]
-  };
-  new Chart(document.getElementById('formasChart'), {
-    type: 'pie',
-    data: formasData,
+  new Chart(document.getElementById('pontualidadeChart'), {
+    type: 'bar',
+    data: pontualidadeData,
   });
 </script>
-
 
 {% endblock %}

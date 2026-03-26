@@ -14,6 +14,7 @@ urlpatterns = [
     path('alunos/<int:aluno_id>/pagamentos/create/', views.pagamento_create, name='pagamento_create'),
     path('pagamentos/<int:pk>/edit/', views.pagamento_update, name='pagamento_update'),
     path('pagamentos/<int:pk>/delete/', views.pagamento_delete, name='pagamento_delete'),
+    path('pagamentos/<int:pk>/mark-paid/', views.pagamento_mark_paid, name='pagamento_mark_paid'),
     path("pagamentos/", views.pagamentos_filter_view, name="pagamentos_filter"),
 
     path('turmas/', views.turmas_list, name='turmas_list'),

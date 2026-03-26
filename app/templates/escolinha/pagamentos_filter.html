@@ -1,6 +1,11 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2 class="text-xl font-bold mb-4">Pagamentos</h2>
+{% if data_inicio or data_fim %}
+<div class="alert alert-info mb-4">
+  <span>Filtro por período aplicado: {{ data_inicio|default:"-" }} até {{ data_fim|default:"-" }}</span>
+</div>
+{% endif %}
 
 <!-- FILTROS -->
 <form method="get" class="grid grid-cols-1 md:grid-cols-5 gap-4 mb-6">
@@ -83,7 +88,7 @@
             <i class="bi bi-trash"></i>
           </a>
 
-          {% if not p.esta_pago %}
+          {% if not p.esta_pago and p.aluno.contato_responsavel %}
           {% if p.atrasado %}
           <a href="https://wa.me/55{{ p.aluno.contato_responsavel }}?text={{ msg_cobranca }}"
             class="btn btn-outline btn-sm ml-2" target="_blank">

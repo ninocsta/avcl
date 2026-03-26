@@ -53,13 +53,11 @@
             <li><a href="{% url 'dashboard' %}"><i class="bi bi-file-earmark-bar-graph"></i> Dashboard</a></li>
             <li><a href="{% url 'alunos_list' %}"><i class="bi bi-person"></i> Alunos</a></li>
             <li><a href="{% url 'pagamentos_filter' %}"><i class="bi bi-cash"></i> Pagamentos</a></li>
-            <li>
             <li><a href="{% url 'turmas_list' %}"><i class="bi bi-people"></i> Turmas</a></li>
-            <li>
             {% if user.is_superuser %}
             <li><a href="{% url 'admin:index' %}"><i class="bi bi-gear"></i></a></li>
-            <li>
             {% endif %}
+            <li>
               <form action="{% url 'logout' %}" method="post" class="">
                 {% csrf_token %}
                 <button type="submit" class="">
@@ -76,13 +74,22 @@
 
     <!-- MAIN -->
     <main class="bg-base-100 p-6 rounded-lg shadow">
+      {% if messages %}
+      <div class="space-y-2 mb-4">
+        {% for message in messages %}
+        <div class="alert {% if message.tags == 'success' %}alert-success{% elif message.tags == 'error' %}alert-error{% elif message.tags == 'warning' %}alert-warning{% else %}alert-info{% endif %}">
+          <span>{{ message }}</span>
+        </div>
+        {% endfor %}
+      </div>
+      {% endif %}
       {% block content %}{% endblock %}
     </main>
 
 
     <!-- Footer -->
     <footer class="footer  text-base-content justify-center p-4 mt-auto" style="align-self: center;">
-      <a href="https://costatech.dev">&copy; {{ year }} Costatech</a>
+      <a href="https://costatech.dev">&copy; {% now "Y" %} Costatech</a>
     </footer>
 
   </div>
