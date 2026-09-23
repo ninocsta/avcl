@@ -4,6 +4,7 @@ from django.core.management.base import BaseCommand
 from django.db.models import Sum
 from django.utils import timezone
 
+from app.notify import notify
 from escolinha.models import Aluno, Pagamento
 
 
@@ -35,7 +36,9 @@ class Command(BaseCommand):
                 )
                 criados += 1
 
-        self.stdout.write(
+        resumo = (
             f"{alunos.count()} alunos processados, {criados} pagamentos criados "
             f"para {hoje.month}/{hoje.year}"
         )
+        self.stdout.write(resumo)
+        notify(f"💰 Mensalidades: {resumo}")
