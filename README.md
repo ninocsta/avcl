@@ -1,4 +1,8 @@
-# 🎯 AVCL - Sistema de Gestão de Escolinha de Futsal
+# 🎯 Sistema de Gestão de Escolinha de Futsal
+
+## Portfolio
+
+Este projeto também possui uma versão preparada para apresentação profissional no diretório local `../Portifolio/apps/avcl`, com banco demo separado, screenshots e documentação resumida.
 
 <div align="center">
 
@@ -9,7 +13,7 @@
 ![Celery](https://img.shields.io/badge/Celery-37814A?style=for-the-badge&logo=celery&logoColor=white)
 ![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 
-Sistema completo para gestão de alunos, turmas, pagamentos e financeiro desenvolvido para a **Associação Vila Costa Lagoão (AVCL)**.
+Sistema completo para gestão de alunos, turmas, pagamentos e financeiro desenvolvido para uma operação de escolinha esportiva.
 
 </div>
 
@@ -30,7 +34,7 @@ Sistema completo para gestão de alunos, turmas, pagamentos e financeiro desenvo
 
 ## 🏆 Sobre o Projeto
 
-O **Sistema AVCL** é uma aplicação web desenvolvida em Django para facilitar a gestão completa de escolinhas esportivas. O sistema oferece controle total sobre:
+O sistema é uma aplicação web desenvolvida em Django para facilitar a gestão completa de escolinhas esportivas. O sistema oferece controle total sobre:
 
 - **👥 Alunos**: Cadastro completo com dados pessoais, responsáveis e valores
 - **📚 Turmas**: Organização de alunos por turmas com status ativo/inativo
@@ -301,10 +305,7 @@ escolinha/
 
 ## 👨‍💻 Autor
 
-Desenvolvido com ❤️ para a **AVCL - Associação Vila Costa Lagoão**
+Desenvolvido para uma operação de escolinha esportiva
 
 ---
-
-
-
 

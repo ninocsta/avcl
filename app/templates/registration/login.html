@@ -5,7 +5,7 @@
   {% load static %}
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Login</title>
+  <title>Login | {{ site_name }}</title>
   <link href="https://cdn.jsdelivr.net/npm/daisyui@5" rel="stylesheet" type="text/css" />
   <link href="https://cdn.jsdelivr.net/npm/daisyui@5/themes.css" rel="stylesheet" type="text/css" />
 
@@ -13,7 +13,7 @@
 </head>
 
 <body class="min-h-screen flex flex-col">
-  <h1 class="font-bold text-center text-white text-4xl p-6" style="margin-top: 40px;">AVCL</h1>
+  <h1 class="font-bold text-center text-white text-4xl p-6" style="margin-top: 40px;">{{ site_short_name }}</h1>
   <!-- Conteúdo central -->
   <div class="flex-1 flex flex-col items-center my-10">
     <div class="card w-full max-w-sm md:max-w-md lg:max-w-lg shadow-xl bg-base-100">
@@ -61,7 +61,7 @@
 
   <!-- Footer -->
   <footer class="footer bg-base-300 text-base-content justify-center p-4 mt-auto" style="align-self: center;">
-    <a href="https://costatech.dev">&copy; {{ year }} Costatech</a>
+    <a href="{{ site_footer_url }}">&copy; {{ year }} {{ site_footer_name }}</a>
   </footer>
 
 </body>
