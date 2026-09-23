@@ -12,6 +12,7 @@ from django.core.paginator import Paginator
 from django.urls import reverse
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_POST
+from django.conf import settings
 
 from .models import Aluno, Pagamento, Turma
 from .forms import AlunoForm, PagamentoForm, TurmaForm
@@ -485,35 +486,40 @@ def pagamentos_filter_view(request):
 
 
 def whatsapp_message(tipo="aviso"):
+    payment_label = settings.SITE_PAYMENT_LABEL
+    payment_key = settings.SITE_PAYMENT_KEY
+    payment_recipient = settings.SITE_PAYMENT_RECIPIENT
+    site_short_name = settings.SITE_SHORT_NAME
+
     if tipo == "cobranca":
-        msg = """Olá! Tudo bem?
+        msg = f"""Olá! Tudo bem?
 
 Verificamos que a mensalidade da escolinha de futsal ainda não foi identificada em nosso sistema.
 Pedimos, por gentileza, que o pagamento seja realizado o quanto antes, para evitar qualquer interrupção nas atividades do aluno.
 
-Pagamento via Pix
-Chave Pix: 51997457095
-Nome: Renato da Costa
+Pagamento via {payment_label}
+Chave {payment_label}: {payment_key}
+Nome: {payment_recipient}
 
 Caso o pagamento já tenha sido efetuado, por favor, desconsidere esta mensagem. ✅
 
 Agradecemos sua compreensão e colaboração.
 
 Atenciosamente,
-Equipe AVCL – Associação Vila Costa Lagoão"""
+Equipe {site_short_name}"""
     else:
-        msg = """Olá! Tudo bem?
+        msg = f"""Olá! Tudo bem?
 
-A AVCL – Associação Vila Costa Lagoão lembra que a mensalidade da escolinha de futsal já está disponível para pagamento.
+A equipe {site_short_name} lembra que a mensalidade da escolinha de futsal já está disponível para pagamento.
 Pedimos que o pagamento seja realizado o quanto antes, garantindo que o aluno continue participando normalmente das atividades.
 
-Forma de pagamento – Pix
-Chave Pix: 51997457095
-Nome: Renato da Costa
+Forma de pagamento – {payment_label}
+Chave {payment_label}: {payment_key}
+Nome: {payment_recipient}
 
 Agradecemos pela atenção e pela parceria de sempre!
 
 Atenciosamente,
-Equipe AVCL – Associação Vila Costa Lagoão"""
+Equipe {site_short_name}"""
 
     return quote(msg)  # aplica urlencode

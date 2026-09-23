@@ -60,6 +60,7 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'app.context_processors.branding',
             ],
         },
     },
@@ -140,8 +141,8 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 SESSION_COOKIE_NAME = "avcl_sessionid"
 CSRF_COOKIE_NAME = "avcl_csrftoken"
 
-SESSION_COOKIE_SECURE = True
-CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = env.bool("SESSION_COOKIE_SECURE", default=not DEBUG)
+CSRF_COOKIE_SECURE = env.bool("CSRF_COOKIE_SECURE", default=not DEBUG)
 
 
 LOGOUT_REDIRECT_URL = '/'
@@ -171,3 +172,12 @@ LOGGING = {
         "django.request": {"handlers": ["console"], "level": "ERROR", "propagate": False},
     },
 }
+
+SITE_NAME = env("SITE_NAME", default="AVCL - Escolinha")
+SITE_SHORT_NAME = env("SITE_SHORT_NAME", default="AVCL")
+SITE_FOOTER_NAME = env("SITE_FOOTER_NAME", default="Costatech")
+SITE_FOOTER_URL = env("SITE_FOOTER_URL", default="https://costatech.dev")
+SITE_WHATSAPP_COUNTRY_CODE = env("SITE_WHATSAPP_COUNTRY_CODE", default="55")
+SITE_PAYMENT_LABEL = env("SITE_PAYMENT_LABEL", default="Pix")
+SITE_PAYMENT_KEY = env("SITE_PAYMENT_KEY", default="51997457095")
+SITE_PAYMENT_RECIPIENT = env("SITE_PAYMENT_RECIPIENT", default="Renato da Costa")
