@@ -10,8 +10,6 @@ Este projeto também possui uma versão preparada para apresentação profission
 ![Python](https://img.shields.io/badge/Python-3.8+-3776AB?style=for-the-badge&logo=python&logoColor=white)
 ![TailwindCSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 ![DaisyUI](https://img.shields.io/badge/DaisyUI-5A0EF8?style=for-the-badge&logo=daisyui&logoColor=white)
-![Celery](https://img.shields.io/badge/Celery-37814A?style=for-the-badge&logo=celery&logoColor=white)
-![Redis](https://img.shields.io/badge/Redis-DC382D?style=for-the-badge&logo=redis&logoColor=white)
 
 Sistema completo para gestão de alunos, turmas, pagamentos e financeiro desenvolvido para uma operação de escolinha esportiva.
 
@@ -74,7 +72,7 @@ Este sistema centraliza todas essas operações em uma interface intuitiva e mod
 - ✅ Múltiplas formas de pagamento (PIX, Dinheiro, Outros)
 - ✅ Status automático (Pago, Pendente, Atrasado)
 - ✅ Filtros avançados (aluno, turma, status, período)
-- ✅ Geração automática mensal via Celery
+- ✅ Geração automática mensal (management command agendado)
 
 ### 📊 Dashboard Analítico
 - ✅ Indicadores principais (Recebido, Esperado, Ativos, Atrasado)
@@ -89,8 +87,7 @@ Este sistema centraliza todas essas operações em uma interface intuitiva e mod
 - ✅ Número de telefone validado e formatado
 
 ### 🤖 Automação
-- ✅ Geração automática de mensalidades via Celery Beat
-- ✅ Processamento em background com Redis
+- ✅ Geração automática de mensalidades (Scheduled Task do Coolify)
 - ✅ Agendamento configurável
 
 ---
@@ -101,9 +98,6 @@ Este sistema centraliza todas essas operações em uma interface intuitiva e mod
 - **Django 5.2.7** - Framework web robusto e escalável
 - **Python 3.8+** - Linguagem de programação
 - **POSTGRESQL** - Banco de dados
-- **Celery 5.5.3** - Processamento assíncrono de tarefas
-- **Redis 5.2.1** - Message broker e cache
-- **django-celery-beat** - Agendamento de tarefas periódicas
 
 ### Frontend
 - **TailwindCSS 4** - Framework CSS utility-first
@@ -121,7 +115,6 @@ Este sistema centraliza todas essas operações em uma interface intuitiva e mod
 ## 📦 Requisitos
 
 - Python 3.8 ou superior
-- Redis Server
 - Git
 - pip (gerenciador de pacotes Python)
 
@@ -162,10 +155,6 @@ Crie um arquivo `.env` na raiz do projeto:
 DEBUG=True
 SECRET_KEY=sua-chave-secreta-aqui
 ALLOWED_HOSTS=localhost,127.0.0.1
-
-# Celery
-CELERY_BROKER_URL=redis://localhost:6379/0
-CELERY_RESULT_BACKEND=redis://localhost:6379/0
 ```
 
 ### 5. Execute as migrações
@@ -192,42 +181,29 @@ Acesse: `http://localhost:8000`
 
 ## ⚙️ Configuração
 
-### Configurar Celery (Tarefas Assíncronas)
+### Geração automática de mensalidades
 
-#### 1. Inicie o Redis
-
-```bash
-# Linux/Mac
-redis-server
-
-# Windows (via WSL ou Docker)
-docker run -d -p 6379:6379 redis
-```
-
-#### 2. Inicie o Celery Worker
-
-Em um novo terminal:
+Sem Celery: é um management command idempotente (só cria o que falta no mês,
+vencimento dia 10, completando parciais/adiantamentos).
 
 ```bash
-celery -A app worker --loglevel=info
+python manage.py gerar_pagamentos_mes
 ```
 
-#### 3. Inicie o Celery Beat (Agendador)
+Em produção (Coolify) é uma **Scheduled Task** do recurso, container `web`:
 
-Em outro terminal:
+| Campo | Valor |
+|---|---|
+| Name | `gerar_pagamentos_mes` |
+| Command | `python manage.py gerar_pagamentos_mes` |
+| Container | `web` |
+| Frequency | `0 6 1 * *` (dia 1 às 06:00, horário de Brasília) |
 
-```bash
-celery -A app beat --loglevel=info
-```
-
-### Configurar Geração Automática de Mensalidades
-
-1. Acesse o Django Admin: `http://localhost:8000/admin`
-2. Vá em **Periodic Tasks** (django-celery-beat)
-3. Crie uma nova tarefa periódica:
-   - **Task**: `escolinha.tasks.gerar_pagamentos_mes`
-   - **Cron**: `0 0 1 * *` (todo dia 1 às 00:00)
-   - **Enabled**: ✅
+O cron da Scheduled Task usa o **Server Timezone** do Coolify
+(Servers → localhost → General → Server Timezone), não o `TZ` do container.
+Hoje ele está em `UTC`: ou mude para `America/Sao_Paulo` e use `0 6 1 * *`,
+ou mantenha UTC e use `0 9 1 * *` (Brasil sem horário de verão = UTC-3 fixo).
+Horário igual ao antigo beat (PeriodicTask "Pagamentos Mensais", 06:00 dia 1).
 
 ---
 
@@ -261,7 +237,6 @@ escolinha/
 ├── app/                          # Projeto Django principal
 │   ├── settings.py               # Configurações
 │   ├── urls.py                   # URLs principais
-│   ├── celery.py                 # Configuração Celery
 │   └── templates/                # Templates globais
 │       ├── base.html             # Layout base
 │       └── escolinha/            # Templates do app
@@ -279,7 +254,6 @@ escolinha/
 │   ├── views.py                  # Views e lógica de negócio
 │   ├── forms.py                  # Formulários Django
 │   ├── urls.py                   # URLs do app
-│   ├── tasks.py                  # Tarefas Celery
 │   ├── admin.py                  # Configuração do Django Admin
 │   └── migrations/               # Migrações do banco
 │

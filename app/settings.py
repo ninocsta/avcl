@@ -32,9 +32,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'escolinha',
-
-    'django_celery_beat',
-
 ]
 
 MIDDLEWARE = [
@@ -132,11 +129,6 @@ STORAGES = {
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
-# O índice do DB vai na própria URL (Redis compartilhado no Coolify).
-CELERY_BROKER_URL = env("REDIS_URL", default="redis://localhost:6379")
-CELERY_RESULT_BACKEND = CELERY_BROKER_URL
-CELERY_TIMEZONE = 'America/Sao_Paulo'
-CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 
 SESSION_COOKIE_NAME = "avcl_sessionid"
 CSRF_COOKIE_NAME = "avcl_csrftoken"

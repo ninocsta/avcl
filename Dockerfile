@@ -20,6 +20,5 @@ USER app
 
 EXPOSE 8000
 
-# Padrão = serviço web: migrate e gunicorn. worker/beat sobrescrevem o command
-# no compose, então a migration roda só aqui.
+# Serviço web: migrate e gunicorn.
 CMD ["sh", "-c", "python manage.py migrate --noinput && exec gunicorn app.wsgi:application --bind 0.0.0.0:8000 --workers ${GUNICORN_WORKERS:-2} --timeout 120"]
